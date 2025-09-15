@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PS e-Sevai - Digital Services</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            animation: slideIn 0.8s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 2.5em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .tagline {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .service-item {
+            padding: 15px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .required {
+            color: #e74c3c;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px;
+                margin: 10px;
+            }
+            
+            .logo {
+                font-size: 2em;
+            }
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">PS e-Sevai</div>
+            <p class="tagline">Your Digital Service Partner</p>
+        </div>
+
+        <div class="success-message" id="successMessage">
+            Thank you! Your request has been submitted successfully.
+        </div>
+
+        <form id="serviceForm">
+            <div class="form-group">
+                <label for="name">Full Name <span class="required">*</span></label>
+                <input type="text" id="name" name="name" required placeholder="Enter your full name">
+            </div>
+
+            <div class="form-group">
+                <label for="mobile">Mobile Number <span class="required">*</span></label>
+                <input type="tel" id="mobile" name="mobile" required placeholder="Enter your mobile number" pattern="[0-9]{10}">
+            </div>
+
+            <div class="form-group">
+                <label for="service">Select Service <span class="required">*</span></label>
+                <select id="service" name="service" required>
+                    <option value="">Choose a service...</option>
+                    <option value="Aadhaar Services">Aadhaar Services</option>
+                    <option value="PAN Card Services">PAN Card Services</option>
+                    <option value="Passport Services">Passport Services</option>
+                    <option value="Ration Card Services">Ration Card Services</option>
+                    <option value="Driving License">Driving License</option>
+                    <option value="Voter ID Services">Voter ID Services</option>
+                    <option value="Income Certificate">Income Certificate</option>
+                    <option value="Community Certificate">Community Certificate</option>
+                    <option value="Birth Certificate">Birth Certificate</option>
+                    <option value="Death Certificate">Death Certificate</option>
+                    <option value="Other Services">Other Services</option>
+                </select>
+            </div>
+
+            <button type="submit" class="submit-btn">Submit Request</button>
+        </form>
+
+        <div class="services-grid">
+            <div class="service-item">
+                <strong>Quick Service</strong><br>
+                Fast & Reliable
+            </div>
+            <div class="service-item">
+                <strong>Expert Help</strong><br>
+                Professional Support
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('serviceForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const mobile = document.getElementById('mobile').value;
+            const service = document.getElementById('service').value;
+            
+            // Validate mobile number (10 digits)
+            if (!/^[0-9]{10}$/.test(mobile)) {
+                alert('Please enter a valid 10-digit mobile number');
+                return;
+            }
+            
+            // Create WhatsApp message
+            const message = `New Service Request from PS e-Sevai Website:
+            
+Name: ${name}
+Mobile Number: ${mobile}
+Service Requested: ${service}
+            
+Please contact the customer to proceed with the service.`;
+            
+            // Replace with your WhatsApp number (include country code without +)
+            const whatsappNumber = "918807837233"; // Replace with your actual WhatsApp number
+            
+            const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+            
+            // Show success message
+            document.getElementById('successMessage').style.display = 'block';
+            
+            // Open WhatsApp
+            window.open(whatsappUrl, '_blank');
+            
+            // Reset form after 2 seconds
+            setTimeout(() => {
+                document.getElementById('serviceForm').reset();
+                document.getElementById('successMessage').style.display = 'none';
+            }, 2000);
+        });
+
+        // Mobile number input validation
+        document.getElementById('mobile').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            if (this.value.length > 10) {
+                this.value = this.value.slice(0, 10);
+            }
+        });
+
+        // Show/hide other service input
+        document.getElementById('service').addEventListener('change', function() {
+            const otherServiceInput = document.getElementById('otherServiceInput');
+            const otherServiceField = document.getElementById('otherService');
+            
+            if (this.value === 'Other Services') {
+                otherServiceInput.classList.add('show');
+                otherServiceField.required = true;
+            } else {
+                otherServiceInput.classList.remove('show');
+                otherServiceField.required = false;
+                otherServiceField.value = '';
+            }
+        });
+    </script>
+</body>
+</html>
