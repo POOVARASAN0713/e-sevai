@@ -426,7 +426,11 @@
                         <option value="Caste Certificate">Caste Certificate</option>
                         <option value="Birth Certificate">Birth Certificate</option>
                         <option value="Death Certificate">Death Certificate</option>
+                        <option value="Banking Services">Banking Services</option>
                         <option value="Insurance Services">Insurance Services</option>
+                        <option value="Government Schemes">Government Schemes</option>
+                        <option value="Online Applications">Online Applications</option>
+                        <option value="Document Verification">Document Verification</option>
                         <option value="Other Services">Other Services</option>
                     </select>
                     
@@ -532,225 +536,238 @@
     </div>
 
     <script>
-        // Store requests in localStorage (persists between browser sessions)
-        let requests = JSON.parse(localStorage.getItem('pseSevaiRequests')) || [];
-        
-        // Save requests to localStorage
-        function saveRequests() {
-            localStorage.setItem('pseSevaiRequests', JSON.stringify(requests));
-        }
-
-        // Get next ID for new requests
-        function getNextId() {
-            return requests.length > 0 ? Math.max(...requests.map(r => r.id)) + 1 : 1;
-        }
-
-        // Page navigation
-        function showPage(pageId) {
-            const pages = document.querySelectorAll('.page');
-            pages.forEach(page => page.classList.remove('active'));
-            document.getElementById(pageId + 'Page').classList.add('active');
-            if (pageId === 'admin') {
-                updateDashboard();
+        // Use an IIFE to avoid polluting the global scope and encapsulate logic
+        (function() {
+            // Function to fetch data from the server
+            async function fetchData() {
+                try {
+                    const response = await fetch('http://localhost:3000/api/requests');
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                    return [];
+                }
             }
-        }
 
-        // Customer form submission
-        document.getElementById('serviceForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = {
-                name: document.getElementById('name').value,
-                mobile: document.getElementById('mobile').value,
-                email: document.getElementById('email').value,
-                service: document.getElementById('service').value,
-                otherService: document.getElementById('otherService').value,
-                notes: document.getElementById('notes').value
-            };
-            
-            // Validate mobile number
-            if (!/^[0-9]{10}$/.test(formData.mobile)) {
-                alert('Please enter a valid 10-digit mobile number');
-                return;
+            // Function to save new data to the server
+            async function saveData(formData) {
+                try {
+                    const response = await fetch('http://localhost:3000/api/requests', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Error submitting request');
+                    }
+                    return await response.json();
+                } catch (error) {
+                    console.error('Submission error:', error);
+                    alert(`An error occurred: ${error.message}`);
+                    return null;
+                }
             }
-            
-            // Determine service text
-            let serviceText = formData.service;
-            if (formData.service === 'Other Services' && formData.otherService.trim()) {
-                serviceText = `Other Services: ${formData.otherService.trim()}`;
-            } else if (formData.service === 'Other Services' && !formData.otherService.trim()) {
-                alert('Please specify the certificate/service you need');
-                return;
+
+            // Function to update request status on the server
+            async function updateRequestStatus(id, status) {
+                try {
+                    const response = await fetch(`http://localhost:3000/api/requests/complete/${id}`, {
+                        method: 'PUT'
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Error updating status');
+                    }
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error marking as completed:', error);
+                    alert(`An error occurred: ${error.message}`);
+                    return null;
+                }
             }
-            
-            // Create new request
-            const newRequest = {
-                id: getNextId(),
-                name: formData.name,
-                mobile: formData.mobile,
-                email: formData.email || 'Not provided',
-                service: serviceText,
-                notes: formData.notes,
-                date: new Date().toISOString().split('T')[0],
-                timestamp: new Date().toLocaleString(),
-                status: 'pending'
-            };
-            
-            // Add to requests array
-            requests.push(newRequest);
-            
-            // Save to localStorage
-            saveRequests();
-            
-            // Simulate sending email notification to you
-            console.log('Email Notification Sent to: dukepoovarasan3@gmail.com');
-            console.log('Subject: New PS e-Sevai Service Request');
-            console.log('Content:');
-            console.log(`New service request received:
-            
-Customer Name: ${formData.name}
-Mobile Number: ${formData.mobile}
-Email: ${formData.email || 'Not provided'}
-Service Requested: ${serviceText}
-Additional Notes: ${formData.notes || 'None'}
-Request Date: ${newRequest.timestamp}
 
-Please login to your admin panel to manage this request.`);
-            
-            // Show success message
-            document.getElementById('successMessage').style.display = 'block';
-            
-            // Auto-scroll to success message
-            document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
-            
-            // Reset form
-            setTimeout(() => {
-                document.getElementById('serviceForm').reset();
-                document.getElementById('successMessage').style.display = 'none';
-                document.getElementById('otherServiceInput').classList.remove('show');
-                document.getElementById('otherService').required = false;
-            }, 4000);
-        });
-
-        // Show/hide other service input
-        document.getElementById('service').addEventListener('change', function() {
-            const otherServiceInput = document.getElementById('otherServiceInput');
-            const otherServiceField = document.getElementById('otherService');
-            
-            if (this.value === 'Other Services') {
-                otherServiceInput.classList.add('show');
-                otherServiceField.required = true;
-            } else {
-                otherServiceInput.classList.remove('show');
-                otherServiceField.required = false;
-                otherServiceField.value = '';
+            // Function to delete a request on the server
+            async function deleteRequestFromServer(id) {
+                try {
+                    const response = await fetch(`http://localhost:3000/api/requests/${id}`, {
+                        method: 'DELETE'
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Error deleting request');
+                    }
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error deleting request:', error);
+                    alert(`An error occurred: ${error.message}`);
+                    return null;
+                }
             }
-        });
 
-        // Mobile number validation
-        document.getElementById('mobile').addEventListener('input', function(e) {
-            this.value = this.value.replace(/[^0-9]/g, '');
-            if (this.value.length > 10) {
-                this.value = this.value.slice(0, 10);
+            // Page navigation
+            window.showPage = function(pageId) {
+                const pages = document.querySelectorAll('.page');
+                pages.forEach(page => page.classList.remove('active'));
+                document.getElementById(pageId + 'Page').classList.add('active');
+                if (pageId === 'admin') {
+                    updateDashboard();
+                }
             }
-        });
 
-        // Admin login
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            // Simple authentication
-            if (username === '07132005' && password === 'ps0713') {
-                showPage('admin');
-                updateDashboard();
-            } else {
-                alert('Invalid username or password. Please contact the administrator.');
-            }
-        });
+            // Customer form submission
+            document.getElementById('serviceForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    name: document.getElementById('name').value,
+                    mobile: document.getElementById('mobile').value,
+                    email: document.getElementById('email').value,
+                    service: document.getElementById('service').value,
+                    otherService: document.getElementById('otherService').value,
+                    notes: document.getElementById('notes').value
+                };
+                
+                // Client-side validation
+                if (!/^[0-9]{10}$/.test(formData.mobile)) {
+                    alert('Please enter a valid 10-digit mobile number');
+                    return;
+                }
+                
+                if (formData.service === 'Other Services' && !formData.otherService.trim()) {
+                    alert('Please specify the certificate/service you need');
+                    return;
+                }
+                
+                // Submit to backend
+                const result = await saveData(formData);
+                if (result) {
+                    document.getElementById('successMessage').style.display = 'block';
+                    document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
+                    
+                    setTimeout(() => {
+                        document.getElementById('serviceForm').reset();
+                        document.getElementById('successMessage').style.display = 'none';
+                        document.getElementById('otherServiceInput').classList.remove('show');
+                        document.getElementById('otherService').required = false;
+                    }, 4000);
+                }
+            });
 
-        // Update admin dashboard
-        function updateDashboard() {
-            // Get data from local storage
-            requests = JSON.parse(localStorage.getItem('pseSevaiRequests')) || [];
+            // Show/hide other service input
+            document.getElementById('service').addEventListener('change', function() {
+                const otherServiceInput = document.getElementById('otherServiceInput');
+                const otherServiceField = document.getElementById('otherService');
+                
+                if (this.value === 'Other Services') {
+                    otherServiceInput.classList.add('show');
+                    otherServiceField.required = true;
+                } else {
+                    otherServiceInput.classList.remove('show');
+                    otherServiceField.required = false;
+                    otherServiceField.value = '';
+                }
+            });
 
-            const total = requests.length;
-            const pending = requests.filter(r => r.status === 'pending').length;
-            const completed = requests.filter(r => r.status === 'completed').length;
-            const today = requests.filter(r => r.date === new Date().toISOString().split('T')[0]).length;
-            
-            document.getElementById('totalRequests').textContent = total;
-            document.getElementById('pendingRequests').textContent = pending;
-            document.getElementById('completedRequests').textContent = completed;
-            document.getElementById('todayRequests').textContent = today;
-            
-            // Update table
-            const tbody = document.getElementById('requestsTableBody');
-            tbody.innerHTML = '';
-            
-            if (requests.length === 0) {
-                const row = tbody.insertRow();
-                row.innerHTML = `<td colspan="8" style="text-align: center; color: #888;">No service requests found.</td>`;
-            } else {
-                requests.forEach(request => {
+            // Mobile number validation
+            document.getElementById('mobile').addEventListener('input', function(e) {
+                this.value = this.value.replace(/[^0-9]/g, '');
+                if (this.value.length > 10) {
+                    this.value = this.value.slice(0, 10);
+                }
+            });
+
+            // Admin login
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                if (username === 'admin' && password === 'ps2024') {
+                    showPage('admin');
+                } else {
+                    alert('Invalid username or password. Please contact the administrator.');
+                }
+            });
+
+            // Update admin dashboard by fetching data from the backend
+            window.updateDashboard = async function() {
+                const requests = await fetchData();
+                
+                const total = requests.length;
+                const pending = requests.filter(r => r.status === 'pending').length;
+                const completed = requests.filter(r => r.status === 'completed').length;
+                const today = requests.filter(r => {
+                    const requestDate = new Date(r.date);
+                    const todayDate = new Date();
+                    return requestDate.getDate() === todayDate.getDate() &&
+                           requestDate.getMonth() === todayDate.getMonth() &&
+                           requestDate.getFullYear() === todayDate.getFullYear();
+                }).length;
+                
+                document.getElementById('totalRequests').textContent = total;
+                document.getElementById('pendingRequests').textContent = pending;
+                document.getElementById('completedRequests').textContent = completed;
+                document.getElementById('todayRequests').textContent = today;
+                
+                // Update table
+                const tbody = document.getElementById('requestsTableBody');
+                tbody.innerHTML = '';
+                
+                if (requests.length === 0) {
                     const row = tbody.insertRow();
-                    row.innerHTML = `
-                        <td>#${String(request.id).padStart(3, '0')}</td>
-                        <td>${request.name}</td>
-                        <td>${request.mobile}</td>
-                        <td>${request.email}</td>
-                        <td>${request.service}</td>
-                        <td>${request.date}</td>
-                        <td><span class="status-${request.status}">${request.status.charAt(0).toUpperCase() + request.status.slice(1)}</span></td>
-                        <td>
-                            ${request.status === 'pending' ? `<button class="action-btn" onclick="markCompleted(${request.id})">Complete</button>` : ''}
-                            <button class="action-btn delete" onclick="deleteRequest(${request.id})">Delete</button>
-                        </td>
-                    `;
-                });
+                    row.innerHTML = `<td colspan="8" style="text-align: center; color: #888; padding: 20px;">No service requests found.</td>`;
+                } else {
+                    requests.forEach(request => {
+                        const row = tbody.insertRow();
+                        row.innerHTML = `
+                            <td>#${request._id.slice(-4)}</td>
+                            <td>${request.name}</td>
+                            <td>${request.mobile}</td>
+                            <td>${request.email}</td>
+                            <td>${request.service}</td>
+                            <td>${new Date(request.date).toISOString().split('T')[0]}</td>
+                            <td><span class="status-${request.status}">${request.status.charAt(0).toUpperCase() + request.status.slice(1)}</span></td>
+                            <td>
+                                ${request.status === 'pending' ? `<button class="action-btn" onclick="markCompleted('${request._id}')">Complete</button>` : ''}
+                                <button class="action-btn delete" onclick="deleteRequest('${request._id}')">Delete</button>
+                            </td>
+                        `;
+                    });
+                }
             }
-        }
 
-        // Add a refresh button to manually update the dashboard
-        function refreshDashboard() {
-            updateDashboard();
-            alert('Dashboard refreshed with latest data!');
-        }
-
-        // Mark request as completed
-        function markCompleted(id) {
-            const request = requests.find(r => r.id === id);
-            if (request) {
-                request.status = 'completed';
-                saveRequests();
-                updateDashboard();
-                alert('Request marked as completed!');
+            // Mark request as completed
+            window.markCompleted = async function(id) {
+                const result = await updateRequestStatus(id, 'completed');
+                if (result) {
+                    updateDashboard();
+                    alert('Request marked as completed!');
+                }
             }
-        }
 
-        // Delete request
-        function deleteRequest(id) {
-            if (confirm('Are you sure you want to delete this request?')) {
-                requests = requests.filter(r => r.id !== id);
-                saveRequests();
-                updateDashboard();
-                alert('Request deleted successfully!');
+            // Delete request
+            window.deleteRequest = async function(id) {
+                if (confirm('Are you sure you want to delete this request?')) {
+                    const result = await deleteRequestFromServer(id);
+                    if (result) {
+                        updateDashboard();
+                        alert('Request deleted successfully!');
+                    }
+                }
             }
-        }
-
-        // Logout
-        function logout() {
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-            showPage('login');
-        }
-
-        // Initially show the customer form page
-        document.addEventListener('DOMContentLoaded', () => {
-            showPage('customer');
-        });
+            
+            // Initial page load
+            document.addEventListener('DOMContentLoaded', () => {
+                showPage('customer');
+            });
+        })();
     </script>
 </body>
 </html>
