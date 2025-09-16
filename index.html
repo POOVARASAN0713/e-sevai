@@ -424,8 +424,13 @@
                         <option value="Voter ID Services">Voter ID Services</option>
                         <option value="Income Certificate">Income Certificate</option>
                         <option value="Caste Certificate">Caste Certificate</option>
+                        <option value="Birth Certificate">Birth Certificate</option>
                         <option value="Death Certificate">Death Certificate</option>
+                        <option value="Banking Services">Banking Services</option>
                         <option value="Insurance Services">Insurance Services</option>
+                        <option value="Government Schemes">Government Schemes</option>
+                        <option value="Online Applications">Online Applications</option>
+                        <option value="Document Verification">Document Verification</option>
                         <option value="Other Services">Other Services</option>
                     </select>
                     
@@ -549,6 +554,9 @@
             const pages = document.querySelectorAll('.page');
             pages.forEach(page => page.classList.remove('active'));
             document.getElementById(pageId + 'Page').classList.add('active');
+            if (pageId === 'admin') {
+                updateDashboard();
+            }
         }
 
         // Customer form submission
@@ -658,7 +666,7 @@ Please login to your admin panel to manage this request.`);
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
-            // Simple authentication (in real app, use proper authentication)
+            // Simple authentication
             if (username === '07132005' && password === 'ps0713') {
                 showPage('admin');
                 updateDashboard();
@@ -686,22 +694,27 @@ Please login to your admin panel to manage this request.`);
             const tbody = document.getElementById('requestsTableBody');
             tbody.innerHTML = '';
             
-            requests.forEach(request => {
+            if (requests.length === 0) {
                 const row = tbody.insertRow();
-                row.innerHTML = `
-                    <td>#${String(request.id).padStart(3, '0')}</td>
-                    <td>${request.name}</td>
-                    <td>${request.mobile}</td>
-                    <td>${request.email}</td>
-                    <td>${request.service}</td>
-                    <td>${request.date}</td>
-                    <td><span class="status-${request.status}">${request.status.charAt(0).toUpperCase() + request.status.slice(1)}</span></td>
-                    <td>
-                        ${request.status === 'pending' ? `<button class="action-btn" onclick="markCompleted(${request.id})">Complete</button>` : ''}
-                        <button class="action-btn delete" onclick="deleteRequest(${request.id})">Delete</button>
-                    </td>
-                `;
-            });
+                row.innerHTML = `<td colspan="8" style="text-align: center; color: #888;">No service requests found.</td>`;
+            } else {
+                requests.forEach(request => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>#${String(request.id).padStart(3, '0')}</td>
+                        <td>${request.name}</td>
+                        <td>${request.mobile}</td>
+                        <td>${request.email}</td>
+                        <td>${request.service}</td>
+                        <td>${request.date}</td>
+                        <td><span class="status-${request.status}">${request.status.charAt(0).toUpperCase() + request.status.slice(1)}</span></td>
+                        <td>
+                            ${request.status === 'pending' ? `<button class="action-btn" onclick="markCompleted(${request.id})">Complete</button>` : ''}
+                            <button class="action-btn delete" onclick="deleteRequest(${request.id})">Delete</button>
+                        </td>
+                    `;
+                });
+            }
         }
 
         // Add a refresh button to manually update the dashboard
